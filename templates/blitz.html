@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block title %}Man vs. Machine{% endblock %}
+
+{% block content %}
+    <h1>Blitz</h1>
+    <h2 id="score">Score: 0</h2> <br>
+    <h2 id="timer">Time Remaining: 30 seconds</h2>
+    <canvas id="myCanvas" class="blitzCanvas"></canvas>
+    <div class="grid-container">
+        <div><button class="grid-item" id="a" onclick="a()"></button></div>
+        <div><button class="grid-item" id="b" onclick="b()"></button></div>
+        <div><button class="grid-item" id="c" onclick="c()"></button></div>
+        <div><button class="grid-item" id="d" onclick="d()"></button></div>
+    </div>
+
+    <button id="start" onclick="start()">Start</button>
+    <h4 id="final"></h4>
+    <button id="refresh" onclick="refresh()">Restart</button>
+
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        var started = false;
+        var index = 0;
+        var time = 30;
+        var score = 0;
+        var timer;
+        var choices = "{{choices}}"
+        var answers = "{{answers}}"
+        var images = "{{images}}"
+        var canvas = document.getElementById("myCanvas")
+        var ctx = canvas.getContext("2d")
+
+        function start() {
+            started = true
+            formatData();
+            document.getElementById("start").style.visibility = "hidden"
+            update();
+            timer = setInterval(decreaseTime, 1000);
+        }
+
+        function formatData() {
+            choices = choices.split(";")
+            for (var i = 0; i < choices.length; i++) {
+                choices[i] = choices[i].split(",")
+            }
+            answers = answers.split(";")
+            images = images.split(";")
+            for (var i = 0; i < images.length; i++) {
+                images[i] = images[i].split(",")
+                for (var j = 0; j < images[i].length; j++) {
+                    images[i][j] = parseInt(images[i][j])
+                }
+            }
+        }
+
+        function scaleImageData(imageData, scale) {
+            var scaled = ctx.createImageData(imageData.width * scale, imageData.height * scale);
+            for(var row = 0; row < imageData.height; row++) {
+                for(var col = 0; col < imageData.width; col++) {
+                var sourcePixel = [
+                    imageData.data[(row * imageData.width + col) * 4 + 0],
+                    imageData.data[(row * imageData.width + col) * 4 + 1],
+                    imageData.data[(row * imageData.width + col) * 4 + 2],
+                    imageData.data[(row * imageData.width + col) * 4 + 3]
+                ];
+                for(var y = 0; y < scale; y++) {
+                    var destRow = row * scale + y;
+                    for(var x = 0; x < scale; x++) {
+                        var destCol = col * scale + x;
+                        for(var i = 0; i < 4; i++) {
+                            scaled.data[(destRow * scaled.width + destCol) * 4 + i] =
+                            sourcePixel[i];
+                        }
+                    }
+                }
+                }
+            }
+            return scaled;
+        }
+
+        function a() {
+            if (started) {
+                if (choices[index][0] === answers[index]) {
+                    score += 1;
+                } else {
+                    score -= 1;
+                }
+                document.getElementById("score").innerHTML = "Score: " + score;
+                update();
+            }
+        }
+
+        function b() {
+            if (started) {
+                if (choices[index][1] === answers[index]) {
+                    score += 1;
+                } else {
+                    score -= 1;
+                }
+                document.getElementById("score").innerHTML = "Score: " + score;
+                update();
+            }
+        }
+
+        function c() {
+            if (started) {
+                if (choices[index][2] === answers[index]) {
+                    score += 1;
+                } else {
+                    score -= 1;
+                }
+                document.getElementById("score").innerHTML = "Score: " + score;
+                update();
+            }
+        }
+
+        function d() {
+            if (started) {
+                if (choices[index][3] === answers[index]) {
+                    score += 1;
+                } else {
+                    score -= 1;
+                }
+                document.getElementById("score").innerHTML = "Score: " + score;
+                update();
+            }
+        }
+
+        function update() {
+            index += 1;
+            document.getElementById("a").innerHTML = choices[index][0];
+            document.getElementById("b").innerHTML = choices[index][1];
+            document.getElementById("c").innerHTML = choices[index][2];
+            document.getElementById("d").innerHTML = choices[index][3];
+            var img = images[index]
+            var palette = ctx.getImageData(0, 0, 32, 32)
+            palette.data.set(new Uint8ClampedArray(img))
+            palette = scaleImageData(palette, 4)
+            ctx.putImageData(palette, canvas.width/2-64, canvas.height/2-64)
+        }
+
+        function decreaseTime() {
+            time -= 1;
+            document.getElementById("timer").innerHTML = "Time Remaining: " + time + " seconds";
+            if (time === 0) {
+                end();
+            }
+        }
+
+        function end() {
+            clearInterval(timer);
+            document.getElementById("final").innerHTML = "Your final score was: " + score;
+            document.getElementById("refresh").innerHTML = "Play Again";
+            started = false;
+        }
+
+        function refresh() {
+            location.reload();
+        }
+
+    </script>
+{% endblock %}
