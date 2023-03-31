@@ -1,0 +1,302 @@
+{% extends "layout.html" %}
+
+{% block title %}Man vs. Machine{% endblock %}
+
+{% block content %}
+    <h1>Man vs. Machine</h1>
+    
+    
+    <h3 id="playerHealth">Your Health: 100</h3>
+    <img id="bot" class="bot" src="/static/bot.png"> <br>
+    <h3 id="machineHealth">Machine Health: 100</h3> <br>
+    <h3 id="timer">Time Remaining: 10 seconds</h3> <br>
+    <h3 id="playerCombo">Your Combo: 0</h3> <br>
+
+    <div class="upper-grid">
+        <div><canvas id="myCanvas" class="mvmCanvas"></canvas></div>
+        <div class="healing-grid">
+            <div><button class="heal-button" id="1" onclick="heal(event)">Heal</button></div>
+            <div><button class="heal-button" id="2" onclick="heal(event)">Heal</button></div>
+            <div><button class="heal-button" id="3" onclick="heal(event)">Heal</button></div>
+            <div><button class="heal-button" id="4" onclick="heal(event)">Heal</button></div>
+            <div><button class="heal-button" id="5" onclick="heal(event)">Heal</button></div>
+            <div><button class="heal-button" id="6" onclick="heal(event)">Heal</button></div>
+            <div><button class="heal-button" id="7" onclick="heal(event)">Heal</button></div>
+            <div><button class="heal-button" id="8" onclick="heal(event)">Heal</button></div>
+            <div><button class="heal-button" id="9" onclick="heal(event)">Heal</button></div>
+        </div>
+    </div>
+    <div class="grid-container">
+        <div><button class="grid-item" id="a" onclick="a()"></button></div>
+        <div><button class="grid-item" id="b" onclick="b()"></button></div>
+        <div><button class="grid-item" id="c" onclick="c()"></button></div>
+        <div><button class="grid-item" id="d" onclick="d()"></button></div>
+    </div>
+
+    <button id="start" onclick="start()">Start</button>
+    <h4 id="final"></h4>
+    <button id="refresh" onclick="refresh()">Restart</button>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    var started = false;
+    var playerTurn = false;
+    var clicked = false;
+    var index = -1;
+    var time = 10;
+    var playerHealth = 100;
+    var machineHealth = 100;
+
+    var timer;
+    var clickTimer;
+
+    var combo = 0;
+    var difficulty = Math.floor(Math.random()*7 + 3);
+
+    var thisHeal = Math.floor(Math.random()*9 + 1).toString();
+    var numHeals = 0;
+
+    var choices = "{{choices}}"
+    var answers = "{{answers}}"
+    var images = "{{images}}"
+    var model = "{{model}}"
+
+    var canvas = document.getElementById("myCanvas")
+    var ctx = canvas.getContext("2d")
+
+    function start() {
+        started = true;
+        formatData();
+        document.getElementById("start").style.visibility = "hidden";
+        update();
+        timer = setInterval(turn, 1000);
+        clickTimer = setInterval(resetClick, 250);
+        document.getElementById("bot").style.visibility = "visible";
+    }
+
+    function formatData() {
+        choices = choices.split(";")
+        for (var i = 0; i < choices.length; i++) {
+            choices[i] = choices[i].split(",")
+        }
+        answers = answers.split(";")
+        images = images.split(";")
+        for (var i = 0; i < images.length; i++) {
+            images[i] = images[i].split(",")
+            for (var j = 0; j < images[i].length; j++) {
+                images[i][j] = parseInt(images[i][j])
+            }
+        }
+        model = model.split(";")
+    }
+
+    function scaleImageData(imageData, scale) {
+        var scaled = ctx.createImageData(imageData.width * scale, imageData.height * scale);
+        for(var row = 0; row < imageData.height; row++) {
+            for(var col = 0; col < imageData.width; col++) {
+            var sourcePixel = [
+                imageData.data[(row * imageData.width + col) * 4 + 0],
+                imageData.data[(row * imageData.width + col) * 4 + 1],
+                imageData.data[(row * imageData.width + col) * 4 + 2],
+                imageData.data[(row * imageData.width + col) * 4 + 3]
+            ];
+            for(var y = 0; y < scale; y++) {
+                var destRow = row * scale + y;
+                for(var x = 0; x < scale; x++) {
+                    var destCol = col * scale + x;
+                    for(var i = 0; i < 4; i++) {
+                        scaled.data[(destRow * scaled.width + destCol) * 4 + i] =
+                        sourcePixel[i];
+                    }
+                }
+            }
+            }
+        }
+        return scaled;
+    }
+
+    function a() {
+        if (started && playerTurn && !clicked) {
+                if (choices[index][0] === answers[index]) {
+                    combo += 1;
+                    machineHealth -= combo;
+                    if (machineHealth <= 0) {
+                        end();
+                    }
+                } else {
+                    combo = 0;
+                }
+                document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
+                document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
+                clicked = true;
+                update();
+        }
+    }
+
+    function b() {
+        if (started && playerTurn && !clicked) {
+                if (choices[index][1] === answers[index]) {
+                    combo += 1;
+                    machineHealth -= combo;
+                    if (machineHealth <= 0) {
+                        end();
+                    }
+                } else {
+                    combo = 0;
+                }
+                document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
+                document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
+                clicked = true;
+                update();
+        }
+    }
+
+    function c() {
+        if (started && playerTurn && !clicked) {
+                if (choices[index][2] === answers[index]) {
+                    combo += 1;
+                    machineHealth -= combo;
+                    if (machineHealth <= 0) {
+                        end();
+                    }
+                } else {
+                    combo = 0;
+                }
+                document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
+                document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
+                clicked = true;
+                update();
+        }
+    }
+
+    function d() {
+        if (started && playerTurn && !clicked) {
+                if (choices[index][3] === answers[index]) {
+                    combo += 1;
+                    machineHealth -= combo;
+                    if (machineHealth <= 0) {
+                        end();
+                    }
+                } else {
+                    combo = 0;
+                }
+                document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
+                document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
+                clicked = true;
+                update();
+        }
+    }
+
+    function resetClick() {
+        clicked = false;
+    }
+
+    function highlight() {
+        for (var j = 0; j < choices[index].length; j++) {
+            if (choices[index][j] === model[index]) {
+                switch (j) {
+                    case 0:
+                        document.getElementById("a").style.background = "#FFC0CB";
+                        return;
+                    case 1:
+                        document.getElementById("b").style.background = "#FFC0CB";
+                        return;
+                    case 2:
+                        document.getElementById("c").style.background = "#FFC0CB";
+                        return;
+                    case 3:
+                        document.getElementById("d").style.background = "#FFC0CB";
+                        return;
+                }
+            }
+        }
+
+    }
+
+    function heal(e) {
+        if (started) {
+            numHeals += 1;
+            playerHealth += Math.floor(Math.random()*3 + 1);
+            document.getElementById("playerHealth").innerHTML = "Your Health: "  + playerHealth;
+            document.getElementById(e.target.id).style.visibility = "hidden";
+            if (numHeals < 8) {
+                thisHeal = Math.floor(Math.random()*9 + 1).toString();
+                document.getElementById(thisHeal).style.visibility = "visible";
+            }
+        }
+    }
+
+    function update() {
+        index += 1;
+        document.getElementById("a").innerHTML = choices[index][0];
+        document.getElementById("a").style.background = "#F0F0F0";
+        document.getElementById("b").innerHTML = choices[index][1];
+        document.getElementById("b").style.background = "#F0F0F0";
+        document.getElementById("c").innerHTML = choices[index][2];
+        document.getElementById("c").style.background = "#F0F0F0";
+        document.getElementById("d").innerHTML = choices[index][3];
+        document.getElementById("d").style.background = "#F0F0F0";
+
+        var img = images[index]
+        var palette = ctx.getImageData(0, 0, 32, 32)
+        palette.data.set(new Uint8ClampedArray(img))
+        palette = scaleImageData(palette, 4)
+        ctx.putImageData(palette, canvas.width/2-64, canvas.height/2-64)
+    }
+
+    function turn() {
+        time -= 1;
+        document.getElementById("timer").innerHTML = "Time Remaining: " + time + " seconds";
+        if (!playerTurn) {
+            if (time % 2 === 0) {
+                if (model[index] === answers[index]) {
+                    playerHealth -= difficulty;
+                    difficulty = Math.floor(Math.random()*7 + 3);
+                    document.getElementById("playerHealth").innerHTML = "Your Health: "  + playerHealth;
+                    if (playerHealth <= 0) {
+                        end();
+                    }
+                }
+                update();
+            } else {
+                highlight();
+            }
+        }
+        if (time === 0) {
+            playerTurn = !playerTurn;
+            combo = 0;
+            if (playerTurn) {
+                time = 10;
+                document.getElementById("bot").style.visibility = "hidden";
+                document.getElementById(thisHeal).style.visibility = "visible";
+                numHeals = 0;
+            } else {
+                time = 10;
+                document.getElementById("bot").style.visibility = "visible";
+                document.getElementById(thisHeal).style.visibility = "hidden";
+            }
+            document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
+            document.getElementById("timer").innerHTML = "Time Remaining: " + time + " seconds";
+        }
+    }
+
+    function end() {
+        clearInterval(timer);
+        document.getElementById("start").style.display = "none";
+        if (machineHealth <= 0) {
+            document.getElementById("final").innerHTML = "You saved the world!";
+        }
+        else {
+            document.getElementById("final").innerHTML = "You were defeated by the machine.";
+        }
+        document.getElementById("refresh").innerHTML = "Play Again";
+        started = false;
+    }
+
+    function refresh() {
+        location.reload();
+    }
+
+</script>
+{% endblock %}
