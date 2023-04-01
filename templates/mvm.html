@@ -1,3 +1,5 @@
+<!-- This file contains the HTML and Javascript for the Man vs. Machine game mode. -->
+
 {% extends "layout.html" %}
 
 {% block title %}Man vs. Machine{% endblock %}
@@ -14,6 +16,7 @@
 
     <div class="upper-grid">
         <div><canvas id="myCanvas" class="mvmCanvas"></canvas></div>
+        <!-- Create a grid of healing buttons to be made visible during the player's turn. -->
         <div class="healing-grid">
             <div><button class="heal-button" id="1" onclick="heal(event)">Heal</button></div>
             <div><button class="heal-button" id="2" onclick="heal(event)">Heal</button></div>
@@ -48,15 +51,18 @@
     var playerHealth = 100;
     var machineHealth = 100;
 
+    // timer keeps track of remaining time for each turn.
+    // clickTimer keeps track of time since previous click for spam protection.
     var timer;
     var clickTimer;
 
-    var combo = 0;
-    var difficulty = Math.floor(Math.random()*7 + 3);
-
+    // Arbitrary choice for damage dealt by the machine and health points given by each healing button.
+    var difficulty = Math.floor(Math.random() * 7 + 3);
     var thisHeal = Math.floor(Math.random()*9 + 1).toString();
     var numHeals = 0;
+    var combo = 0;
 
+    // Receive all preloaded data.
     var choices = "{{choices}}"
     var answers = "{{answers}}"
     var images = "{{images}}"
@@ -71,10 +77,16 @@
         document.getElementById("start").style.visibility = "hidden";
         update();
         timer = setInterval(turn, 1000);
+
+        // Allows the user to click every 250 milliseconds.
         clickTimer = setInterval(resetClick, 250);
         document.getElementById("bot").style.visibility = "visible";
     }
 
+    /*
+    Unpack the preloaded data, including answer choices, correct answers, image data, and model predictions.
+    Each round will correspond with a certain index.
+    */
     function formatData() {
         choices = choices.split(";")
         for (var i = 0; i < choices.length; i++) {
@@ -91,6 +103,9 @@
         model = model.split(";")
     }
 
+    /*
+    Scale the 32x32 pixel image to a visible size.
+    */
     function scaleImageData(imageData, scale) {
         var scaled = ctx.createImageData(imageData.width * scale, imageData.height * scale);
         for(var row = 0; row < imageData.height; row++) {
@@ -116,82 +131,108 @@
         return scaled;
     }
 
+    /*
+    Called if answer choice a is clicked. Checks that the game is running,
+    it is the player's turn, and there has not been a click in the past 250 milliseconds.
+    If these conditions are met, then check if the answer is correct and update accordingly.
+    */
     function a() {
         if (started && playerTurn && !clicked) {
-                if (choices[index][0] === answers[index]) {
-                    combo += 1;
-                    machineHealth -= combo;
-                    if (machineHealth <= 0) {
-                        end();
-                    }
-                } else {
-                    combo = 0;
+            if (choices[index][0] === answers[index]) {
+                combo += 1;
+                machineHealth -= combo;
+                if (machineHealth <= 0) {
+                    end();
                 }
-                document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
-                document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
-                clicked = true;
-                update();
+            } else {
+                combo = 0;
+            }
+            document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
+            document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
+            clicked = true;
+            update();
         }
     }
 
+    /*
+    Called if answer choice b is clicked. Checks that the game is running,
+    it is the player's turn, and there has not been a click in the past 250 milliseconds.
+    If these conditions are met, then check if the answer is correct and update accordingly.
+    */
     function b() {
         if (started && playerTurn && !clicked) {
-                if (choices[index][1] === answers[index]) {
-                    combo += 1;
-                    machineHealth -= combo;
-                    if (machineHealth <= 0) {
-                        end();
-                    }
-                } else {
-                    combo = 0;
+            if (choices[index][1] === answers[index]) {
+                combo += 1;
+                machineHealth -= combo;
+                if (machineHealth <= 0) {
+                    end();
                 }
-                document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
-                document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
-                clicked = true;
-                update();
+            } else {
+                combo = 0;
+            }
+            document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
+            document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
+            clicked = true;
+            update();
         }
     }
 
+    /*
+    Called if answer choice c is clicked. Checks that the game is running,
+    it is the player's turn, and there has not been a click in the past 250 milliseconds.
+    If these conditions are met, then check if the answer is correct and update accordingly.
+    */
     function c() {
         if (started && playerTurn && !clicked) {
-                if (choices[index][2] === answers[index]) {
-                    combo += 1;
-                    machineHealth -= combo;
-                    if (machineHealth <= 0) {
-                        end();
-                    }
-                } else {
-                    combo = 0;
+            if (choices[index][2] === answers[index]) {
+                combo += 1;
+                machineHealth -= combo;
+                if (machineHealth <= 0) {
+                    end();
                 }
-                document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
-                document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
-                clicked = true;
-                update();
+            } else {
+                combo = 0;
+            }
+            document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
+            document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
+            clicked = true;
+            update();
         }
     }
 
+    /*
+    Called if answer choice d is clicked. Checks that the game is running,
+    it is the player's turn, and there has not been a click in the past 250 milliseconds.
+    If these conditions are met, then check if the answer is correct and update accordingly.
+    */
     function d() {
         if (started && playerTurn && !clicked) {
-                if (choices[index][3] === answers[index]) {
-                    combo += 1;
-                    machineHealth -= combo;
-                    if (machineHealth <= 0) {
-                        end();
-                    }
-                } else {
-                    combo = 0;
+            if (choices[index][3] === answers[index]) {
+                combo += 1;
+                machineHealth -= combo;
+                if (machineHealth <= 0) {
+                    end();
                 }
-                document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
-                document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
-                clicked = true;
-                update();
+            } else {
+                combo = 0;
+            }
+            document.getElementById("playerCombo").innerHTML = "Your Combo: " + combo;
+            document.getElementById("machineHealth").innerHTML = "Machine Health: " + machineHealth;
+            clicked = true;
+            update();
         }
     }
 
+    /*
+    Called by clickTimer every 250 milliseconds for spam protection.
+    */
     function resetClick() {
         clicked = false;
     }
 
+    /*
+    Visually highlight the model's predicted label so that the player can see.
+    */
     function highlight() {
         for (var j = 0; j < choices[index].length; j++) {
             if (choices[index][j] === model[index]) {
@@ -214,6 +255,10 @@
 
     }
 
+    /*
+    Called if a healing button is clicked (up to 7 heals per player turn).
+    Displays one of the other healing buttons on the grid if heals are still available.
+    */
     function heal(e) {
         if (started) {
             numHeals += 1;
@@ -227,6 +272,9 @@
         }
     }
 
+    /*
+    Start a new round with the next image in the preloaded data.
+    */
     function update() {
         index += 1;
         document.getElementById("a").innerHTML = choices[index][0];
@@ -245,6 +293,10 @@
         ctx.putImageData(palette, canvas.width/2-64, canvas.height/2-64)
     }
 
+    /*
+    Runs logic for robot opponent if it is not the player's turn.
+    Switches turns if turn time has run out.
+    */
     function turn() {
         time -= 1;
         document.getElementById("timer").innerHTML = "Time Remaining: " + time + " seconds";
@@ -281,6 +333,9 @@
         }
     }
 
+    /*
+    Ends the game with either a win or a loss for the player.
+    */
     function end() {
         clearInterval(timer);
         document.getElementById("start").style.display = "none";
